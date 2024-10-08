@@ -1,0 +1,29 @@
+#ifndef _SEGMENTAL_CSV_MONEY_H_
+#define _SEGMENTAL_CSV_MONEY_H_
+
+#include <stdint.h>
+
+typedef int64_t money_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ *
+ * @param buf
+ * @param data
+ * @param sep
+ * @param mul must be 10, 100, 1000, etc.
+ * @return const char*
+ */
+const char *parse_money(const char *buf, money_t *data, char sep, int mul, char numSep);
+
+char *output_money(char *buf, money_t data, int prec, int mul);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _SEGMENTAL_CSV_MONEY_H_ */
