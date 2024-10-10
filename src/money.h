@@ -18,9 +18,9 @@ extern "C" {
  * @param mul must be 10, 100, 1000, etc.
  * @return const char*
  */
-const char *parse_money(const char *buf, money_t *data, char sep, int mul, char numSep);
+const char *parse_money(const char *buf, money_t *data, char sep, int scale, char num_sep);
 
-char *output_money(char *buf, money_t data, int prec, int mul);
+char *output_money(char *buf, money_t data, int prec, int scale);
 
 #ifdef __cplusplus
 }

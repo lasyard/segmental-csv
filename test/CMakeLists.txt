@@ -1,5 +1,8 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+add_test(test_csv_parser test.cpp test_csv_parser.cpp)
+target_link_libraries(test_csv_parser PRIVATE ${LIB_NAME})
+
 add_test(test_date_time test.cpp test_date_time.cpp)
 target_link_libraries(test_date_time PRIVATE ${LIB_NAME})
 

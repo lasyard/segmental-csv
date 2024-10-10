@@ -74,15 +74,15 @@ const char *parse_time(const char *buf, dtime_t *data, char sep)
     return p;
 }
 
-char *output_date(char *buf, date_t data, char dateSep)
+char *output_date(char *buf, date_t data, char date_sep)
 {
     int year, month, day;
     jdn_split(data, &year, &month, &day);
     char *p = buf;
     p = output_int64_len(p, year, 4);
-    *(p++) = dateSep;
+    *(p++) = date_sep;
     p = output_int64_len(p, month, 2);
-    *(p++) = dateSep;
+    *(p++) = date_sep;
     p = output_int64_len(p, day, 2);
     return p;
 }
