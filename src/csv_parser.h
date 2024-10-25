@@ -22,9 +22,13 @@ void init_parser(struct parser_context *ctx);
 
 void set_money_prec(struct parser_context *ctx, int money_prec);
 
+void init_data(const struct parser_context *ctx, void *data);
+
 const char *parse_line(const struct parser_context *ctx, const char *line, void *data);
 
 char *output_line(const struct parser_context *ctx, char *buf, const void *data);
+
+void release_data(const struct parser_context *ctx, void *data);
 
 #ifdef __cplusplus
 }

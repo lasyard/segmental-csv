@@ -88,7 +88,14 @@ const char *parse_cstring(const char *buf, char **data, char sep)
 {
     struct string str;
     const char *p = parse_string(buf, &str, sep);
-    return_null_if_null(set_cstring(data, str.buf, str.len));
+    if (str.len > 0) {
+        return_null_if_null(set_cstring(data, str.buf, str.len));
+    } else {
+        if (*data != NULL) {
+            free(*data);
+            *data = NULL;
+        }
+    }
     return p;
 }
 

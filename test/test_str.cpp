@@ -99,7 +99,7 @@ TEST_CASE("parse_cstring")
     CHECK(p - s == 3);
     s = p + 1;
     p = parse_cstring(s, &str, ':');
-    CHECK(strcmp(str, "") == 0);
+    CHECK(str == NULL);
     CHECK(p - s == 0);
     s = p + 1;
     p = parse_cstring(s, &str, '/');

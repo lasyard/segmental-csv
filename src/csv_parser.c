@@ -1,9 +1,47 @@
 #include "csv_parser.h"
 
+#include <stdlib.h>
+
 #include "date_time.h"
+#include "defs.h"
 #include "int.h"
 #include "money.h"
 #include "str.h"
+
+static void init_by_type(enum column_type type, void *data)
+{
+    switch (type) {
+    case CT_STR: {
+        struct string *string = (struct string *)data;
+        string->buf = NULL;
+        string->len = 0;
+        break;
+    }
+    case CT_CSTR:
+        *(char **)data = NULL;
+        break;
+    case CT_INT32:
+        *(int32_t *)data = 0;
+        break;
+    case CT_INT64:
+        *(int64_t *)data = 0LL;
+        break;
+    case CT_BOOL:
+        *(bool *)data = false;
+        break;
+    case CT_MONEY:
+        *(money_t *)data = 0LL;
+        break;
+    case CT_DATE:
+        *(date_t *)data = 0;
+        break;
+    case CT_TIME:
+        *(dtime_t *)data = 0;
+        break;
+    default:
+        break;
+    }
+}
 
 static const char *parse_by_type(const struct parser_context *ctx, const char *buf, enum column_type type, void *data)
 {
@@ -79,6 +117,14 @@ void set_money_prec(struct parser_context *ctx, int money_prec)
     }
 }
 
+void init_data(const struct parser_context *ctx, void *data)
+{
+    for (int i = 0; i < ctx->cols; ++i) {
+        enum column_type type = ctx->types[i];
+        init_by_type(type, ctx->f_get_ptr(data, i));
+    }
+}
+
 const char *parse_line(const struct parser_context *ctx, const char *line, void *data)
 {
     const char *p = line;
@@ -86,9 +132,7 @@ const char *parse_line(const struct parser_context *ctx, const char *line, void 
         enum column_type type = ctx->types[i];
         const char *b = p;
         p = parse_by_type(ctx, b, type, ctx->f_get_ptr(data, i));
-        if (p == NULL) {
-            return NULL;
-        }
+        return_null_if_null(p);
         ++p; // Skip the sep
     }
     return p;
@@ -103,6 +147,17 @@ char *output_line(const struct parser_context *ctx, char *buf, const void *data)
             *(p++) = ctx->sep;
         }
     }
-    *(p++) = '\0';
+    *(p++) = '\n';
     return p;
+}
+
+void release_data(const struct parser_context *ctx, void *data)
+{
+    for (int i = 0; i < ctx->cols; ++i) {
+        enum column_type type = ctx->types[i];
+        if (type == CT_CSTR) {
+            char **cstr = (char **)(ctx->f_get_ptr(data, i));
+            free(*cstr);
+        }
+    }
 }
