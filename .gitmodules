@@ -1,3 +1,6 @@
 [submodule "doctest"]
 	path = doctest
 	url = git@github.com:doctest/doctest.git
+[submodule "external/wx-common"]
+	path = external/wx-common
+	url = git@github.com:lasyard/wx-common.git
