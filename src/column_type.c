@@ -1,5 +1,7 @@
 #include "column_type.h"
 
+#include "str.h"
+
 const char *name_of(enum column_type type)
 {
     switch (type) {
@@ -23,4 +25,37 @@ const char *name_of(enum column_type type)
         break;
     }
     return "IGNORE";
+}
+
+static struct string names[] = {
+    {  "STR", 3},
+    { "CSTR", 4},
+    {"INT32", 5},
+    {"INT64", 5},
+    { "BOOL", 4},
+    {"MONEY", 5},
+    { "DATE", 4},
+    { "TIME", 4},
+};
+
+enum column_type value_of(struct string *str)
+{
+    if (string_compare_nc(str, &names[0]) == 0) {
+        return CT_STR;
+    } else if (string_compare_nc(str, &names[1]) == 0) {
+        return CT_CSTR;
+    } else if (string_compare_nc(str, &names[2]) == 0) {
+        return CT_INT32;
+    } else if (string_compare_nc(str, &names[3]) == 0) {
+        return CT_INT64;
+    } else if (string_compare_nc(str, &names[4]) == 0) {
+        return CT_BOOL;
+    } else if (string_compare_nc(str, &names[5]) == 0) {
+        return CT_MONEY;
+    } else if (string_compare_nc(str, &names[6]) == 0) {
+        return CT_DATE;
+    } else if (string_compare_nc(str, &names[7]) == 0) {
+        return CT_TIME;
+    }
+    return CT_IGNORE;
 }

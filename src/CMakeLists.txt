@@ -11,3 +11,5 @@ add_lib(${LIB_NAME}
     segments.c
     str.c
 )
+
+#add_subdirectory(gui)

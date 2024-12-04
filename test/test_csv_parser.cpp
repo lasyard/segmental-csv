@@ -44,7 +44,8 @@ TEST_CASE("parse_line")
     SUBCASE("sep == ','")
     {
         struct record r;
-        parse_line(&ctx, "   abc, def , 10, -100 ,, 123.45", &r);
+        const char *p = parse_line(&ctx, "   abc, def , 10, -100 ,, 123.45\n", &r);
+        CHECK(*p == '\0');
         CHECK(string_cstrcmp(&r.str1, "abc") == 0);
         CHECK(string_cstrcmp(&r.str2, "def") == 0);
         CHECK(r.i1 == 10);
@@ -53,15 +54,56 @@ TEST_CASE("parse_line")
     }
     SUBCASE("sep == '|'")
     {
-        ctx.sep = '|';
+        ctx.options.sep = '|';
         struct record r;
-        parse_line(&ctx, "   123| 4567 | -32768| 343 | sdafsfsd| 67 89.10", &r);
+        const char *p = parse_line(&ctx, "   123| 4567 | -32768| 343 | sdafsfsd| 67 89.10\n", &r);
+        CHECK(*p == '\0');
         CHECK(string_cstrcmp(&r.str1, "123") == 0);
         CHECK(string_cstrcmp(&r.str2, "4567") == 0);
         CHECK(r.i1 == -32768);
         CHECK(r.i2 == 343);
         CHECK(r.amount == 678910);
     }
+}
+
+TEST_CASE("parse_strings")
+{
+    struct parser_options opt;
+    init_options(&opt);
+    const char *line = "a, bc, def\n";
+    int count = parse_count(&opt, line);
+    CHECK(count == 3);
+    char **data = (char **)malloc(sizeof(char *) * count);
+    init_strings(data, count);
+    const char *p = parse_strings(&opt, line, data, count);
+    CHECK(*p == '\0');
+    CHECK(strcmp(data[0], "a") == 0);
+    CHECK(strcmp(data[1], "bc") == 0);
+    CHECK(strcmp(data[2], "def") == 0);
+    release_strings(data, count);
+    free(data);
+}
+
+TEST_CASE("parse_types")
+{
+    struct parser_options opt;
+    init_options(&opt);
+    const char *line = "STR, CSTR,INT32,INT64,BOOL, MONEY, DATE ,TIME,IGN\n";
+    int count = parse_count(&opt, line);
+    CHECK(count == 9);
+    enum column_type *types = (enum column_type *)malloc(sizeof(enum column_type) * count);
+    const char *p = parse_types(&opt, line, types, count);
+    CHECK(*p == '\0');
+    CHECK(types[0] == CT_STR);
+    CHECK(types[1] == CT_CSTR);
+    CHECK(types[2] == CT_INT32);
+    CHECK(types[3] == CT_INT64);
+    CHECK(types[4] == CT_BOOL);
+    CHECK(types[5] == CT_MONEY);
+    CHECK(types[6] == CT_DATE);
+    CHECK(types[7] == CT_TIME);
+    CHECK(types[8] == CT_IGNORE);
+    free(types);
 }
 
 struct record1 {
@@ -106,7 +148,7 @@ TEST_CASE("outputLine")
     {
         r.i1 = 10;
         r.i2 = -100;
-        ctx.sep = '|';
+        ctx.options.sep = '|';
         char *p = output_line(&ctx, buf, &r);
         *p = '\0';
         CHECK(strcmp(buf, "10|-100\n") == 0);

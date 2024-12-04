@@ -43,28 +43,28 @@ static void init_by_type(enum column_type type, void *data)
     }
 }
 
-static const char *parse_by_type(const struct parser_context *ctx, const char *buf, enum column_type type, void *data)
+static const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data)
 {
     switch (type) {
     case CT_STR:
-        return parse_string(buf, (struct string *)data, ctx->sep);
+        return parse_string(buf, (struct string *)data, opt->sep);
     case CT_CSTR:
-        return parse_cstring(buf, (char **)data, ctx->sep);
+        return parse_cstring(buf, (char **)data, opt->sep);
     case CT_INT32:
-        return parse_int32(buf, (int32_t *)data, ctx->sep);
+        return parse_int32(buf, (int32_t *)data, opt->sep);
     case CT_INT64:
-        return parse_int64(buf, (int64_t *)data, ctx->sep);
+        return parse_int64(buf, (int64_t *)data, opt->sep);
     case CT_BOOL:
-        return parse_bool(buf, (bool *)data, ctx->sep);
+        return parse_bool(buf, (bool *)data, opt->sep);
     case CT_MONEY:
-        return parse_money(buf, (money_t *)data, ctx->sep, ctx->money_scale, ctx->num_sep);
+        return parse_money(buf, (money_t *)data, opt->sep, opt->money_scale, opt->num_sep);
     case CT_DATE:
-        return parse_date(buf, (date_t *)data, ctx->sep, ctx->date_sep);
+        return parse_date(buf, (date_t *)data, opt->sep, opt->date_sep);
     case CT_TIME:
-        return parse_time(buf, (dtime_t *)data, ctx->sep);
+        return parse_time(buf, (dtime_t *)data, opt->sep);
     case CT_IGNORE: {
         const char *p;
-        for (p = buf; *p != ctx->sep && !is_line_end(*p); ++p) {
+        for (p = buf; *p != opt->sep && !is_line_end(*p); ++p) {
         }
         return p;
     }
@@ -72,7 +72,7 @@ static const char *parse_by_type(const struct parser_context *ctx, const char *b
     return NULL;
 }
 
-static char *output_by_type(const struct parser_context *ctx, char *buf, enum column_type type, const void *data)
+static char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data)
 {
     switch (type) {
     case CT_STR:
@@ -86,9 +86,9 @@ static char *output_by_type(const struct parser_context *ctx, char *buf, enum co
     case CT_BOOL:
         return output_bool(buf, *(const bool *)data);
     case CT_MONEY:
-        return output_money(buf, *(const money_t *)data, ctx->money_prec, ctx->money_scale);
+        return output_money(buf, *(const money_t *)data, opt->money_prec, opt->money_scale);
     case CT_DATE:
-        return output_date(buf, *(const date_t *)data, ctx->date_sep);
+        return output_date(buf, *(const date_t *)data, opt->date_sep);
     case CT_TIME:
         return output_time(buf, *(const dtime_t *)data);
     case CT_IGNORE:
@@ -97,24 +97,49 @@ static char *output_by_type(const struct parser_context *ctx, char *buf, enum co
     return buf;
 }
 
+static void set_options_money_prec(struct parser_options *opt, int money_prec)
+{
+    opt->money_prec = money_prec;
+    opt->money_scale = 1;
+    for (int i = 0; i < money_prec; ++i) {
+        opt->money_scale *= 10;
+    }
+}
+
+void init_options(struct parser_options *opt)
+{
+    opt->sep = ',';
+    opt->num_sep = ' ';
+    opt->date_sep = '-';
+    set_options_money_prec(opt, 2);
+}
+
 void init_parser(struct parser_context *ctx)
 {
     ctx->cols = 0;
     ctx->types = NULL;
-    ctx->sep = ',';
-    ctx->num_sep = ' ';
-    ctx->date_sep = '-';
-    set_money_prec(ctx, 2);
     ctx->f_get_ptr = NULL;
+    init_options(&ctx->options);
 }
 
 void set_money_prec(struct parser_context *ctx, int money_prec)
 {
-    ctx->money_prec = money_prec;
-    ctx->money_scale = 1;
-    for (int i = 0; i < money_prec; ++i) {
-        ctx->money_scale *= 10;
+    set_options_money_prec(&ctx->options, money_prec);
+}
+
+int parse_count(const struct parser_options *opt, const char *line)
+{
+    const char *p = skip_space(line);
+    if (is_line_end(*p)) {
+        return 0;
     }
+    int count = 1;
+    for (; !is_line_end(*p); ++p) {
+        if (*p == opt->sep) {
+            ++count;
+        }
+    }
+    return count;
 }
 
 void init_data(const struct parser_context *ctx, void *data)
@@ -130,24 +155,10 @@ const char *parse_line(const struct parser_context *ctx, const char *line, void 
     const char *p = line;
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
-        const char *b = p;
-        p = parse_by_type(ctx, b, type, ctx->f_get_ptr(data, i));
+        p = parse_by_type(&ctx->options, p, type, ctx->f_get_ptr(data, i));
         return_null_if_null(p);
         ++p; // Skip the sep
     }
-    return p;
-}
-
-char *output_line(const struct parser_context *ctx, char *buf, const void *data)
-{
-    char *p = buf;
-    for (int i = 0; i < ctx->cols; ++i) {
-        p = output_by_type(ctx, p, ctx->types[i], (const void *)(ctx->f_get_ptr((void *)data, i)));
-        if (i < ctx->cols - 1) {
-            *(p++) = ctx->sep;
-        }
-    }
-    *(p++) = '\n';
     return p;
 }
 
@@ -160,4 +171,57 @@ void release_data(const struct parser_context *ctx, void *data)
             free(*cstr);
         }
     }
+}
+
+void init_strings(char **data, int count)
+{
+    for (int i = 0; i < count; ++i) {
+        data[i] = NULL;
+    }
+}
+
+const char *parse_strings(const struct parser_options *opt, const char *line, char **data, int count)
+{
+    const char *p = line;
+    for (int i = 0; i < count; ++i) {
+        p = parse_by_type(opt, p, CT_CSTR, &data[i]);
+        return_null_if_null(p);
+        ++p; // Skip the sep
+    }
+    return p;
+}
+
+void release_strings(char **data, int count)
+{
+    for (int i = 0; i < count; ++i) {
+        if (data[i] != NULL) {
+            free(data[i]);
+        }
+    }
+}
+
+const char *parse_types(const struct parser_options *opt, const char *line, enum column_type *data, int count)
+{
+    const char *p = line;
+    for (int i = 0; i < count; ++i) {
+        struct string str;
+        p = parse_string(p, &str, opt->sep);
+        return_null_if_null(p);
+        data[i] = value_of(&str);
+        ++p; // Skip the sep
+    }
+    return p;
+}
+
+char *output_line(const struct parser_context *ctx, char *buf, const void *data)
+{
+    char *p = buf;
+    for (int i = 0; i < ctx->cols; ++i) {
+        p = output_by_type(&ctx->options, p, ctx->types[i], (const void *)(ctx->f_get_ptr((void *)data, i)));
+        if (i < ctx->cols - 1) {
+            *(p++) = ctx->options.sep;
+        }
+    }
+    *(p++) = '\n';
+    return p;
 }
