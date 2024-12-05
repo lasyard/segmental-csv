@@ -12,4 +12,4 @@ add_lib(${LIB_NAME}
     str.c
 )
 
-#add_subdirectory(gui)
+add_subdirectory(gui)

@@ -1,0 +1,33 @@
+# Chinese translations for crypto-file-viewer package.
+# Copyright (C) 2024 Lasy
+# This file is distributed under the same license as the crypto-file-viewer package.
+# Automatically generated, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: crypto-file-viewer 1.0.0\n"
+"Report-Msgid-Bugs-To: lasyard@yeah.net\n"
+"POT-Creation-Date: 2024-12-04 15:36+0800\n"
+"PO-Revision-Date: 2024-11-11 16:46+0800\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ScvApp.cpp:41
+msgid " Doc"
+msgstr " 文档"
+
+#: ScvApp.cpp:42
+msgid " View"
+msgstr " 视图"
+
+#: ScvMainFrame.cpp:67
+msgid "File"
+msgstr "文件"
+
+#: ScvMainFrame.cpp:108
+msgid "License"
+msgstr "许可证"
