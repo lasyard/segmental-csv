@@ -157,3 +157,23 @@ TEST_CASE("outputLine")
         CHECK(strcmp(buf, "10|-100\n") == 0);
     }
 }
+
+TEST_CASE("commond_record")
+{
+    enum column_type types[] { CT_STR, CT_STR, CT_INT32, CT_INT64, CT_IGNORE, CT_MONEY };
+    struct parser_context ctx;
+    init_parser(&ctx);
+    ctx.cols = 6;
+    ctx.types = types;
+    struct common_record_meta *crm = use_common_record(&ctx);
+    void *data = create_common_data(crm);
+    const char *p = parse_line(&ctx, "   abc, def , 10, -100 ,, 123.45\n", data);
+    CHECK(*p == '\0');
+    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 0), "abc") == 0);
+    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 1), "def") == 0);
+    CHECK(*(int32_t *)common_get_ptr(data, 2) == 10);
+    CHECK(*(int64_t *)common_get_ptr(data, 3) == -100L);
+    CHECK(*(int64_t *)common_get_ptr(data, 5) == 12345L);
+    free(data);
+    free(crm);
+}

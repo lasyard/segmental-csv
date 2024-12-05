@@ -18,6 +18,12 @@ struct parser_context {
     void *(*f_get_ptr)(void *data, int i); // Function to get member ptr of data.
 };
 
+struct common_record_meta {
+    const struct parser_context *ctx;
+    size_t bytes;      // Total bytes of a record.
+    size_t offsets[0]; // Offsets of each field.
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,6 +51,12 @@ void release_strings(char **data, int count);
 const char *parse_types(const struct parser_options *opt, const char *line, enum column_type *data, int count);
 
 char *output_line(const struct parser_context *ctx, char *buf, const void *data);
+
+void *common_get_ptr(void *data, int i);
+
+struct common_record_meta *use_common_record(struct parser_context *ctx);
+
+void *create_common_data(const struct common_record_meta *crm);
 
 #ifdef __cplusplus
 }

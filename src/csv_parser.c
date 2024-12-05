@@ -225,3 +225,33 @@ char *output_line(const struct parser_context *ctx, char *buf, const void *data)
     *(p++) = '\n';
     return p;
 }
+
+void *common_get_ptr(void *data, int i)
+{
+    const struct common_record_meta *crm = *(const struct common_record_meta *const *)data;
+    size_t offset = crm->offsets[i];
+    return data + offset;
+}
+
+struct common_record_meta *use_common_record(struct parser_context *ctx)
+{
+    struct common_record_meta *crm =
+        (struct common_record_meta *)malloc(sizeof(struct common_record_meta) + ctx->cols * sizeof(size_t));
+    return_null_if_null(crm);
+    crm->ctx = ctx;
+    size_t offset = sizeof(struct common_record_meta *);
+    for (int i = 0; i < ctx->cols; ++i) {
+        crm->offsets[i] = offset;
+        offset += size_of(ctx->types[i]);
+    }
+    crm->bytes = offset;
+    ctx->f_get_ptr = common_get_ptr;
+    return crm;
+}
+
+void *create_common_data(const struct common_record_meta *crm)
+{
+    void *data = malloc(crm->bytes);
+    *(const struct common_record_meta **)data = crm;
+    return data;
+}

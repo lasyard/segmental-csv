@@ -1,6 +1,8 @@
 #ifndef _SEGMENTAL_CSV_COLUMN_TYPE_H_
 #define _SEGMENTAL_CSV_COLUMN_TYPE_H_
 
+#include <stddef.h>
+
 struct string;
 
 enum column_type {
@@ -22,6 +24,8 @@ extern "C" {
 const char *name_of(enum column_type type);
 
 enum column_type value_of(struct string *str);
+
+size_t size_of(enum column_type type);
 
 #ifdef __cplusplus
 }
