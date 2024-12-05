@@ -13,9 +13,10 @@ struct parser_options {
 
 struct parser_context {
     struct parser_options options;
-    int cols;                              // The number of columns.
-    const enum column_type *types;         // The types of each column.
-    void *(*f_get_ptr)(void *data, int i); // Function to get member ptr of data.
+    int cols;                                                   // The number of columns.
+    const enum column_type *types;                              // The types of each column.
+    void *(*f_get_ptr)(void *data, int i, const void *context); // Function to get member ptr of data.
+    const void *context;
 };
 
 struct common_record_meta {
@@ -52,11 +53,9 @@ const char *parse_types(const struct parser_options *opt, const char *line, enum
 
 char *output_line(const struct parser_context *ctx, char *buf, const void *data);
 
-void *common_get_ptr(void *data, int i);
+void *common_get_ptr(void *data, int i, const void *context);
 
 struct common_record_meta *use_common_record(struct parser_context *ctx);
-
-void *create_common_data(const struct common_record_meta *crm);
 
 #ifdef __cplusplus
 }

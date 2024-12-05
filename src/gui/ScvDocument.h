@@ -5,6 +5,9 @@
 
 #include "Common.h"
 
+#include "../segmental_csv_parser.h"
+#include "../segments.h"
+
 class ScvView;
 
 class ScvDocument : public wxDocument
@@ -29,7 +32,16 @@ public:
     void OnChange(wxCommandEvent &event);
 
 private:
+    static constexpr enum column_type SEG_TYPE[] = {CT_CSTR};
+
     ScvView *GetView() const;
+
+    struct segmental_parser_context m_ctx;
+    int m_count;
+    char **m_labels;
+    enum column_type *m_types;
+    struct common_record_meta *m_crm;
+    struct segments m_segments;
 };
 
 #endif /* _SEGMENTAL_CSV_GUI_SCV_DOCUMENT_H_ */

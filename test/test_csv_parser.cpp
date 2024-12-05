@@ -16,7 +16,8 @@ struct record {
     money_t amount;
 };
 
-static void *get_record_ptr(void *data, int i)
+extern "C" {
+static void *get_record_ptr(void *data, int i, [[maybe_unused]] const void *context)
 {
     struct record *r = (struct record *)data;
     switch (i) {
@@ -34,6 +35,7 @@ static void *get_record_ptr(void *data, int i)
         break;
     }
     return NULL;
+}
 }
 
 TEST_CASE("parse_line")
@@ -114,7 +116,8 @@ struct record1 {
     int64_t i2;
 };
 
-static void *get_record1_ptr(void *data, int i)
+extern "C" {
+static void *get_record1_ptr(void *data, int i, [[maybe_unused]] const void *context)
 {
     struct record1 *r = (struct record1 *)data;
     switch (i) {
@@ -126,6 +129,7 @@ static void *get_record1_ptr(void *data, int i)
         break;
     }
     return NULL;
+}
 }
 
 TEST_CASE("outputLine")
@@ -166,14 +170,14 @@ TEST_CASE("commond_record")
     ctx.cols = 6;
     ctx.types = types;
     struct common_record_meta *crm = use_common_record(&ctx);
-    void *data = create_common_data(crm);
+    void *data = malloc(crm->bytes);
     const char *p = parse_line(&ctx, "   abc, def , 10, -100 ,, 123.45\n", data);
     CHECK(*p == '\0');
-    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 0), "abc") == 0);
-    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 1), "def") == 0);
-    CHECK(*(int32_t *)common_get_ptr(data, 2) == 10);
-    CHECK(*(int64_t *)common_get_ptr(data, 3) == -100L);
-    CHECK(*(int64_t *)common_get_ptr(data, 5) == 12345L);
+    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 0, crm), "abc") == 0);
+    CHECK(string_cstrcmp((struct string *)common_get_ptr(data, 1, crm), "def") == 0);
+    CHECK(*(int32_t *)common_get_ptr(data, 2, crm) == 10);
+    CHECK(*(int64_t *)common_get_ptr(data, 3, crm) == -100L);
+    CHECK(*(int64_t *)common_get_ptr(data, 5, crm) == 12345L);
     free(data);
     free(crm);
 }

@@ -146,7 +146,7 @@ void init_data(const struct parser_context *ctx, void *data)
 {
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
-        init_by_type(type, ctx->f_get_ptr(data, i));
+        init_by_type(type, ctx->f_get_ptr(data, i, ctx->context));
     }
 }
 
@@ -155,7 +155,7 @@ const char *parse_line(const struct parser_context *ctx, const char *line, void 
     const char *p = line;
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
-        p = parse_by_type(&ctx->options, p, type, ctx->f_get_ptr(data, i));
+        p = parse_by_type(&ctx->options, p, type, ctx->f_get_ptr(data, i, ctx->context));
         return_null_if_null(p);
         ++p; // Skip the sep
     }
@@ -167,7 +167,7 @@ void release_data(const struct parser_context *ctx, void *data)
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
         if (type == CT_CSTR) {
-            char **cstr = (char **)(ctx->f_get_ptr(data, i));
+            char **cstr = (char **)(ctx->f_get_ptr(data, i, ctx->context));
             free(*cstr);
         }
     }
@@ -217,7 +217,12 @@ char *output_line(const struct parser_context *ctx, char *buf, const void *data)
 {
     char *p = buf;
     for (int i = 0; i < ctx->cols; ++i) {
-        p = output_by_type(&ctx->options, p, ctx->types[i], (const void *)(ctx->f_get_ptr((void *)data, i)));
+        p = output_by_type(
+            &ctx->options,
+            p,
+            ctx->types[i],
+            (const void *)(ctx->f_get_ptr((void *)data, i, ctx->context))
+        );
         if (i < ctx->cols - 1) {
             *(p++) = ctx->options.sep;
         }
@@ -226,9 +231,9 @@ char *output_line(const struct parser_context *ctx, char *buf, const void *data)
     return p;
 }
 
-void *common_get_ptr(void *data, int i)
+void *common_get_ptr(void *data, int i, const void *context)
 {
-    const struct common_record_meta *crm = *(const struct common_record_meta *const *)data;
+    const struct common_record_meta *crm = (const struct common_record_meta *)context;
     size_t offset = crm->offsets[i];
     return data + offset;
 }
@@ -246,12 +251,6 @@ struct common_record_meta *use_common_record(struct parser_context *ctx)
     }
     crm->bytes = offset;
     ctx->f_get_ptr = common_get_ptr;
+    ctx->context = crm;
     return crm;
-}
-
-void *create_common_data(const struct common_record_meta *crm)
-{
-    void *data = malloc(crm->bytes);
-    *(const struct common_record_meta **)data = crm;
-    return data;
 }
