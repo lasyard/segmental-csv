@@ -1,5 +1,9 @@
 ScvApp.cpp
+ScvArtProvider.cpp
 ScvDocument.cpp
+ScvGrid.cpp
+ScvGridCellAttrProvider.cpp
 ScvMainFrame.cpp
 ScvPanel.cpp
+ScvTable.cpp
 ScvView.cpp

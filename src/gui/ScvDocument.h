@@ -31,6 +31,19 @@ public:
 
     void OnChange(wxCommandEvent &event);
 
+    void GetColLabels(wxArrayString &labels);
+
+    struct segments &GetSegments()
+    {
+        return m_segments;
+    }
+
+    const wxString GetItemValueString(struct item *item, int i) const;
+    const wxString GetSegmentValueString(struct segment *segment) const;
+
+    void SetItemValueString(struct item *item, int i, const wxString &value);
+    void SetSegmentValueString(struct segment *segment, const wxString &value);
+
 private:
     static constexpr enum column_type SEG_TYPE[] = {CT_CSTR};
 

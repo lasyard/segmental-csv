@@ -29,6 +29,10 @@ struct common_record_meta {
 extern "C" {
 #endif
 
+const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data);
+
+char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data);
+
 void init_options(struct parser_options *opt);
 
 void init_parser(struct parser_context *ctx);

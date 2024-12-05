@@ -43,7 +43,7 @@ static void init_by_type(enum column_type type, void *data)
     }
 }
 
-static const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data)
+const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data)
 {
     switch (type) {
     case CT_STR:
@@ -72,7 +72,7 @@ static const char *parse_by_type(const struct parser_options *opt, const char *b
     return NULL;
 }
 
-static char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data)
+char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data)
 {
     switch (type) {
     case CT_STR:

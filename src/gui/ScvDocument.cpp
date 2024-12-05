@@ -7,6 +7,9 @@
 
 #include "ScvView.h"
 
+#include "../item.h"
+#include "../segment.h"
+
 IMPLEMENT_DYNAMIC_CLASS(ScvDocument, wxDocument)
 IMPLEMENT_TM(ScvDocument)
 
@@ -143,6 +146,38 @@ void ScvDocument::OnChange(wxCommandEvent &event)
     wxLogTrace(TM, "\"%s\" called.", __WXFUNCTION__);
     Modify(true);
     event.Skip();
+}
+
+void ScvDocument::GetColLabels(wxArrayString &labels)
+{
+    for (int i = 0; i < m_count; ++i) {
+        labels.push_back(m_labels[i]);
+    }
+}
+
+const wxString ScvDocument::GetItemValueString(struct item *item, int i) const
+{
+    char buf[MAX_LINE_LENGTH];
+    const parser_context &ctx = m_ctx.item_parser_context;
+    output_by_type(&ctx.options, buf, ctx.types[i], item->data);
+    return buf;
+}
+
+const wxString ScvDocument::GetSegmentValueString(struct segment *segment) const
+{
+    return *(char *)(*(char **)segment->data);
+}
+
+void ScvDocument::SetItemValueString(struct item *item, int i, const wxString &value)
+{
+    const parser_context &ctx = m_ctx.item_parser_context;
+    parse_by_type(&ctx.options, value.c_str(), ctx.types[i], ctx.f_get_ptr(item->data, i, ctx.context));
+}
+
+void ScvDocument::SetSegmentValueString(struct segment *segment, const wxString &value)
+{
+    const parser_context &ctx = m_ctx.segment_parser_context;
+    parse_by_type(&ctx.options, value.c_str(), ctx.types[0], ctx.f_get_ptr(segment->data, 0, ctx.context));
 }
 
 ScvView *ScvDocument::GetView() const

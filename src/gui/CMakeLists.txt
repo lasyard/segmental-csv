@@ -17,9 +17,13 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
 
 add_exe(${APP_NAME}
     ScvApp.cpp
+    ScvArtProvider.cpp
     ScvDocument.cpp
+    ScvGrid.cpp
+    ScvGridCellAttrProvider.cpp
     ScvMainFrame.cpp
     ScvPanel.cpp
+    ScvTable.cpp
     ScvView.cpp
     ${CMAKE_SOURCE_DIR}/external/wx-common/Utils.cpp
 )

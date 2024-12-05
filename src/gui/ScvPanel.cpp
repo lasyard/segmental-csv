@@ -12,6 +12,8 @@
 #include "ScvPanel.h"
 
 #include "ScvDefs.h"
+#include "ScvGrid.h"
+#include "Utils.h"
 
 IMPLEMENT_DYNAMIC_CLASS(ScvPanel, wxPanel)
 IMPLEMENT_TM(ScvPanel)
@@ -27,7 +29,7 @@ ScvPanel::ScvPanel(wxWindow *parent) : wxPanel(parent), m_doc(nullptr)
 {
     wxLog::AddTraceMask(TM);
     auto *sizer = new wxBoxSizer(wxVERTICAL);
-    m_grid = new wxGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT);
+    m_grid = new ScvGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT);
     sizer->Add(m_grid, wxSizerFlags().Expand().Border(wxALL, 0).Proportion(1));
     SetSizer(sizer);
     m_grid->SetMinSize(wxSize(160, -1));
@@ -40,6 +42,7 @@ ScvPanel::~ScvPanel()
 
 void ScvPanel::OnUpdate()
 {
+    m_grid->CreateScvTable(m_doc);
 }
 
 void ScvPanel::SaveContents()
@@ -54,6 +57,7 @@ void ScvPanel::OnUpdateInsert(wxUpdateUIEvent &event)
 void ScvPanel::OnInsert([[maybe_unused]] wxCommandEvent &event)
 {
     wxLogTrace(TM, "\"%s\" called.", __WXFUNCTION__);
+    WxCommon::DelegateEvent(m_grid, event);
 }
 
 void ScvPanel::OnUpdateDelete(wxUpdateUIEvent &event)
@@ -63,4 +67,5 @@ void ScvPanel::OnUpdateDelete(wxUpdateUIEvent &event)
 
 void ScvPanel::OnDelete([[maybe_unused]] wxCommandEvent &event)
 {
+    WxCommon::DelegateEvent(m_grid, event);
 }

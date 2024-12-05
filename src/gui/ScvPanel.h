@@ -7,9 +7,8 @@
 
 #include "Common.h"
 
-class wxGrid;
-
 class ScvDocument;
+class ScvGrid;
 
 class ScvPanel : public wxPanel
 {
@@ -41,7 +40,7 @@ public:
 
 private:
     ScvDocument *m_doc;
-    wxGrid *m_grid;
+    ScvGrid *m_grid;
 };
 
 #endif /* _SEGMENTAL_CSV_GUI_SCV_PANEL_H_ */
