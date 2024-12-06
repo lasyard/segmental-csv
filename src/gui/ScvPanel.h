@@ -29,10 +29,7 @@ public:
     void OnUpdateDelete(wxUpdateUIEvent &event);
     void OnDelete(wxCommandEvent &event);
 
-    void SetDocument(ScvDocument *doc)
-    {
-        m_doc = doc;
-    }
+    void SetDocument(ScvDocument *doc);
 
     void ClearContents()
     {

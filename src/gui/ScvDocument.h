@@ -38,15 +38,19 @@ public:
         return m_segments;
     }
 
-    const wxString GetItemValueString(struct item *item, int i) const;
-    const wxString GetSegmentValueString(struct segment *segment) const;
+    enum column_type GetItemValueType(int i) const
+    {
+        wxASSERT(i < m_count);
+        return m_types[i];
+    }
+
+    const wxString GetItemValueString(const struct item *item, int i) const;
+    const wxString GetSegmentValueString(const struct segment *segment) const;
 
     void SetItemValueString(struct item *item, int i, const wxString &value);
     void SetSegmentValueString(struct segment *segment, const wxString &value);
 
 private:
-    static constexpr enum column_type SEG_TYPE[] = {CT_CSTR};
-
     ScvView *GetView() const;
 
     struct segmental_parser_context m_ctx;

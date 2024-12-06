@@ -20,7 +20,6 @@ struct parser_context {
 };
 
 struct common_record_meta {
-    const struct parser_context *ctx;
     size_t bytes;      // Total bytes of a record.
     size_t offsets[0]; // Offsets of each field.
 };
@@ -28,10 +27,6 @@ struct common_record_meta {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data);
-
-char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data);
 
 void init_options(struct parser_options *opt);
 
@@ -42,6 +37,8 @@ void set_money_prec(struct parser_context *ctx, int money_prec);
 int parse_count(const struct parser_options *opt, const char *line);
 
 void init_data(const struct parser_context *ctx, void *data);
+
+const char *parse_field(const struct parser_context *ctx, const char *buf, void *data, int i);
 
 const char *parse_line(const struct parser_context *ctx, const char *line, void *data);
 
@@ -54,6 +51,10 @@ const char *parse_strings(const struct parser_options *opt, const char *line, ch
 void release_strings(char **data, int count);
 
 const char *parse_types(const struct parser_options *opt, const char *line, enum column_type *data, int count);
+
+char *output_field(const struct parser_context *ctx, char *buf, const void *data, int i);
+
+const char *get_cstr_field(const struct parser_context *ctx, const void *data, int i);
 
 char *output_line(const struct parser_context *ctx, char *buf, const void *data);
 

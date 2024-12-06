@@ -2,18 +2,17 @@
 
 #include "ScvTable.h"
 
-#include "ScvDocument.h"
-#include "ScvGridCellAttrProvider.h"
-
 #include "../item.h"
 #include "../segment.h"
 
+#include "ScvGridCellAttrProvider.h"
+
 ScvTable::ScvTable(ScvDocument *doc) : wxGridTableBase(), m_doc(doc), m_cache(nullptr)
 {
-    SetAttrProvider(new ScvGridCellAttrProvider());
     m_doc->GetColLabels(m_colLabels);
-    CreateIndex();
-    CreateCache(m_index.size());
+    CreateIndexAndCache();
+    // must after index and cache are created
+    SetAttrProvider(new ScvGridCellAttrProvider(this));
 }
 
 ScvTable::~ScvTable()
@@ -132,7 +131,7 @@ bool ScvTable::CanHaveAttributes()
     return true;
 }
 
-void ScvTable::CreateIndex()
+void ScvTable::CreateIndexAndCache()
 {
     struct segments &segments = m_doc->GetSegments();
     m_index.clear();
@@ -145,12 +144,9 @@ void ScvTable::CreateIndex()
             m_index.push_back(IndexItem(item, seq++));
         }
     }
-}
-
-void ScvTable::CreateCache(int rows)
-{
+    int rows = m_index.size();
     m_cache = new wxVector<wxArrayString>(rows);
-    for (auto i = 0; i < GetNumberRows(); ++i) {
+    for (auto i = 0; i < rows; ++i) {
         CacheRow(i);
     }
 }

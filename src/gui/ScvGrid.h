@@ -50,12 +50,11 @@ public:
      */
     void SetAttributes();
 
-    void OnGridSelectCell(wxGridEvent &event);
-
     void OnUpdateInsert(wxUpdateUIEvent &event);
     void OnInsert(wxCommandEvent &event);
     void OnUpdateDelete(wxUpdateUIEvent &event);
     void OnDelete(wxCommandEvent &event);
+    void OnGridSelectCell(wxGridEvent &event);
 
     void CreateScvTable(ScvDocument *doc);
 

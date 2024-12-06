@@ -16,11 +16,17 @@ IMPLEMENT_TM(ScvDocument)
 BEGIN_EVENT_TABLE(ScvDocument, wxDocument)
 END_EVENT_TABLE()
 
+struct segment_data {
+    char *title;
+};
+
+static enum column_type SEGMENT_TYPE[] = {CT_CSTR};
+
 extern "C" {
 static void *segment_get_ptr(void *data, int i, [[maybe_unused]] const void *context)
 {
     if (i == 0) {
-        return data;
+        return &static_cast<struct segment_data *>(data)->title;
     }
     return NULL;
 }
@@ -42,8 +48,9 @@ ScvDocument::ScvDocument() : wxDocument(), m_count(0), m_labels(nullptr), m_type
     wxLog::AddTraceMask(TM);
     init_parser(&m_ctx.segment_parser_context);
     m_ctx.segment_parser_context.cols = 1;
-    m_ctx.segment_parser_context.types = SEG_TYPE;
+    m_ctx.segment_parser_context.types = SEGMENT_TYPE;
     m_ctx.segment_parser_context.f_get_ptr = segment_get_ptr;
+    m_ctx.segment_data_size = sizeof(struct segment);
     init_parser(&m_ctx.item_parser_context);
     init_segments(&m_segments);
 }
@@ -66,7 +73,7 @@ ScvDocument::~ScvDocument()
 bool ScvDocument::OnNewDocument()
 {
     wxLogTrace(TM, "\"%s\" called.", __WXFUNCTION__);
-    wxMessageBox("Create scv files is not allowed!");
+    wxLogError(_("Create scv files is not allowed!"));
     return false;
 }
 
@@ -117,6 +124,7 @@ bool ScvDocument::DoOpenDocument(const wxString &fileName)
     m_ctx.item_parser_context.cols = m_count;
     m_ctx.item_parser_context.types = m_types;
     m_crm = use_common_record(&m_ctx.item_parser_context);
+    m_ctx.item_data_size = m_crm->bytes;
     lines = segmental_parse(&m_ctx, &m_segments, scv_read, &file);
     wxLogStatus("%d lines read.", lines);
     return true;
@@ -155,29 +163,38 @@ void ScvDocument::GetColLabels(wxArrayString &labels)
     }
 }
 
-const wxString ScvDocument::GetItemValueString(struct item *item, int i) const
+const wxString ScvDocument::GetItemValueString(const struct item *item, int i) const
 {
-    char buf[MAX_LINE_LENGTH];
     const parser_context &ctx = m_ctx.item_parser_context;
-    output_by_type(&ctx.options, buf, ctx.types[i], item->data);
-    return buf;
+    if (m_types[i] != CT_CSTR) {
+        char buf[MAX_LINE_LENGTH];
+        char *p = output_field(&ctx, buf, item->data, i);
+        *p = '\0';
+        return buf;
+    } else {
+        return get_cstr_field(&ctx, item->data, i);
+    }
 }
 
-const wxString ScvDocument::GetSegmentValueString(struct segment *segment) const
+const wxString ScvDocument::GetSegmentValueString(const struct segment *segment) const
 {
-    return *(char *)(*(char **)segment->data);
+    const struct segment_data *str = static_cast<const struct segment_data *>(segment->data);
+    if (str->title != NULL) {
+        return str->title;
+    }
+    return "";
 }
 
 void ScvDocument::SetItemValueString(struct item *item, int i, const wxString &value)
 {
     const parser_context &ctx = m_ctx.item_parser_context;
-    parse_by_type(&ctx.options, value.c_str(), ctx.types[i], ctx.f_get_ptr(item->data, i, ctx.context));
+    parse_field(&ctx, value.c_str(), item->data, i);
 }
 
 void ScvDocument::SetSegmentValueString(struct segment *segment, const wxString &value)
 {
     const parser_context &ctx = m_ctx.segment_parser_context;
-    parse_by_type(&ctx.options, value.c_str(), ctx.types[0], ctx.f_get_ptr(segment->data, 0, ctx.context));
+    parse_field(&ctx, value.c_str(), segment->data, 0);
 }
 
 ScvView *ScvDocument::GetView() const

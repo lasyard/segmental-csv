@@ -18,6 +18,7 @@ EVT_UPDATE_UI(ID_INSERT, ScvGrid::OnUpdateInsert)
 EVT_MENU(ID_INSERT, ScvGrid::OnInsert)
 EVT_UPDATE_UI(wxID_DELETE, ScvGrid::OnUpdateDelete)
 EVT_MENU(wxID_DELETE, ScvGrid::OnDelete)
+EVT_GRID_SELECT_CELL(ScvGrid::OnGridSelectCell)
 END_EVENT_TABLE()
 
 ScvGrid::ScvGrid() : wxGrid()
@@ -69,19 +70,6 @@ void ScvGrid::SetAttributes()
     SetColLabelSize(logo.GetHeight() + 2);
     DisableDragColMove();
     EndBatch();
-}
-
-void ScvGrid::OnGridSelectCell(wxGridEvent &event)
-{
-    int row = event.GetRow();
-    int col = event.GetCol();
-    int numRows, numCols;
-    // GetCellSize never returns CellSpan_Inside, so test the first column.
-    if (col != 0 && GetCellSize(row, 0, &numRows, &numCols) == CellSpan_Main) {
-        // This will re-generate this event.
-        SetGridCursor(row, 0);
-        event.Veto();
-    }
 }
 
 void ScvGrid::OnUpdateInsert(wxUpdateUIEvent &event)
@@ -137,13 +125,26 @@ void ScvGrid::OnDelete([[maybe_unused]] wxCommandEvent &event)
     EndBatch();
 }
 
+void ScvGrid::OnGridSelectCell(wxGridEvent &event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    int numRows, numCols;
+    // GetCellSize never returns CellSpan_Inside, so test the first column.
+    if (col != 0 && GetCellSize(row, 0, &numRows, &numCols) == CellSpan_Main) {
+        // This will re-generate this event.
+        SetGridCursor(row, 0);
+        event.Veto();
+    }
+}
+
 void ScvGrid::CreateScvTable(ScvDocument *doc)
 {
     auto table = new ScvTable(doc);
     // Vital, for the original grid cursor may be out of range.
     int cursorRow = GetGridCursorRow();
     int maxRow = table->GetNumberRows() - 1;
-    if (cursorRow > maxRow) {
+    if (maxRow >= 0 && cursorRow > maxRow) {
         SetGridCursor(maxRow, GetGridCursorCol());
     }
     // Change table after cursor set.

@@ -12,6 +12,7 @@
 #include "ScvPanel.h"
 
 #include "ScvDefs.h"
+#include "ScvDocument.h"
 #include "ScvGrid.h"
 #include "Utils.h"
 
@@ -32,6 +33,7 @@ ScvPanel::ScvPanel(wxWindow *parent) : wxPanel(parent), m_doc(nullptr)
     m_grid = new ScvGrid(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBK_LEFT);
     sizer->Add(m_grid, wxSizerFlags().Expand().Border(wxALL, 0).Proportion(1));
     SetSizer(sizer);
+    m_grid->SetAttributes();
     m_grid->SetMinSize(wxSize(160, -1));
 }
 
@@ -68,4 +70,14 @@ void ScvPanel::OnUpdateDelete(wxUpdateUIEvent &event)
 void ScvPanel::OnDelete([[maybe_unused]] wxCommandEvent &event)
 {
     WxCommon::DelegateEvent(m_grid, event);
+}
+
+void ScvPanel::SetDocument(ScvDocument *doc)
+{
+    if (m_doc != nullptr) {
+        // This may be not necessary.
+        m_grid->Unbind(wxEVT_GRID_CELL_CHANGED, &ScvDocument::OnChange, m_doc);
+    }
+    m_doc = doc;
+    m_grid->Bind(wxEVT_GRID_CELL_CHANGED, &ScvDocument::OnChange, m_doc);
 }

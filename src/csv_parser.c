@@ -43,7 +43,7 @@ static void init_by_type(enum column_type type, void *data)
     }
 }
 
-const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data)
+static const char *parse_by_type(const struct parser_options *opt, const char *buf, enum column_type type, void *data)
 {
     switch (type) {
     case CT_STR:
@@ -72,7 +72,7 @@ const char *parse_by_type(const struct parser_options *opt, const char *buf, enu
     return NULL;
 }
 
-char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data)
+static char *output_by_type(const struct parser_options *opt, char *buf, enum column_type type, const void *data)
 {
     switch (type) {
     case CT_STR:
@@ -150,12 +150,16 @@ void init_data(const struct parser_context *ctx, void *data)
     }
 }
 
+const char *parse_field(const struct parser_context *ctx, const char *buf, void *data, int i)
+{
+    return parse_by_type(&ctx->options, buf, ctx->types[i], ctx->f_get_ptr(data, i, ctx->context));
+}
+
 const char *parse_line(const struct parser_context *ctx, const char *line, void *data)
 {
     const char *p = line;
     for (int i = 0; i < ctx->cols; ++i) {
-        enum column_type type = ctx->types[i];
-        p = parse_by_type(&ctx->options, p, type, ctx->f_get_ptr(data, i, ctx->context));
+        p = parse_field(ctx, p, data, i);
         return_null_if_null(p);
         ++p; // Skip the sep
     }
@@ -213,16 +217,27 @@ const char *parse_types(const struct parser_options *opt, const char *line, enum
     return p;
 }
 
+char *output_field(const struct parser_context *ctx, char *buf, const void *data, int i)
+{
+    return output_by_type(
+        &ctx->options,
+        buf,
+        ctx->types[i],
+        (const void *)(ctx->f_get_ptr((void *)data, i, ctx->context))
+    );
+}
+
+const char *get_cstr_field(const struct parser_context *ctx, const void *data, int i)
+{
+    const char *s = *(const char *const *)(ctx->f_get_ptr((void *)data, i, ctx->context));
+    return s != NULL ? s : "";
+}
+
 char *output_line(const struct parser_context *ctx, char *buf, const void *data)
 {
     char *p = buf;
     for (int i = 0; i < ctx->cols; ++i) {
-        p = output_by_type(
-            &ctx->options,
-            p,
-            ctx->types[i],
-            (const void *)(ctx->f_get_ptr((void *)data, i, ctx->context))
-        );
+        p = output_field(ctx, p, data, i);
         if (i < ctx->cols - 1) {
             *(p++) = ctx->options.sep;
         }
@@ -243,7 +258,6 @@ struct common_record_meta *use_common_record(struct parser_context *ctx)
     struct common_record_meta *crm =
         (struct common_record_meta *)malloc(sizeof(struct common_record_meta) + ctx->cols * sizeof(size_t));
     return_null_if_null(crm);
-    crm->ctx = ctx;
     size_t offset = sizeof(struct common_record_meta *);
     for (int i = 0; i < ctx->cols; ++i) {
         crm->offsets[i] = offset;

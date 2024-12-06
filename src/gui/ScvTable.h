@@ -4,13 +4,17 @@
 #include <wx/grid.h>
 #include <wx/vector.h>
 
-class ScvDocument;
+#include "../column_type.h"
+
+#include "ScvDocument.h"
 
 class ScvTable : public wxGridTableBase
 {
 public:
     ScvTable(ScvDocument *doc);
     virtual ~ScvTable();
+
+    enum IndexType { SEGMENT, ITEM, OTHER };
 
     int GetNumberRows() override;
     int GetNumberCols() override;
@@ -27,9 +31,20 @@ public:
 
     bool CanHaveAttributes() override;
 
-private:
-    enum IndexType { SEGMENT, ITEM, OTHER };
+    IndexType GetRowType(int row) const
+    {
+        if ((size_t)row < m_index.size()) {
+            return m_index[row].m_type;
+        }
+        return OTHER;
+    }
 
+    enum column_type GetItemFieldType(int col) const
+    {
+        return m_doc->GetItemValueType(col);
+    }
+
+private:
     struct IndexItem {
         explicit IndexItem(struct segment *ptr) : m_ptr(ptr), m_type(SEGMENT), m_seq(0)
         {
@@ -50,8 +65,7 @@ private:
     wxVector<wxArrayString> *m_cache;
     wxArrayString m_colLabels;
 
-    void CreateIndex();
-    void CreateCache(int rows);
+    void CreateIndexAndCache();
 
     void CacheCell(int row, int col);
     void CacheRow(int row);
@@ -80,14 +94,6 @@ private:
     {
         // Do nothing, deletion is done in `ScvGrid`.
         return true;
-    }
-
-    auto GetRowType(int row) const
-    {
-        if ((size_t)row < m_index.size()) {
-            return m_index[row].m_type;
-        }
-        return OTHER;
     }
 };
 
