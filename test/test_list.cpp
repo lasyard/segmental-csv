@@ -25,7 +25,7 @@ TEST_CASE("test_list_lifecycle")
     struct int_list_node node1;
     list_item_init(&node1.list);
     node1.value = 2;
-    list_head_add(&head, &node1.list);
+    list_ins_head(&head, &node1.list);
     CHECK(!list_is_empty(&head));
     CHECK(!list_has_only(&head, &node1.list));
     CHECK(list_is_first(&head, &node1.list));

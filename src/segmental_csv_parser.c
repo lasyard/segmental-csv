@@ -68,6 +68,22 @@ struct item *add_new_item(const struct segmental_parser_context *ctx, struct seg
     return item;
 }
 
+struct item *insert_new_item(const struct segmental_parser_context *ctx, struct item *pos)
+{
+    struct item *item = new_item(ctx);
+    return_null_if_null(item);
+    insert_item(pos, item);
+    return item;
+}
+
+struct item *insert_new_item_head(const struct segmental_parser_context *ctx, struct segment *segment)
+{
+    struct item *item = new_item(ctx);
+    return_null_if_null(item);
+    insert_item_head(segment, item);
+    return item;
+}
+
 struct segment *add_new_segment(const struct segmental_parser_context *ctx, struct segments *segments)
 {
     struct segment *segment = new_segment(ctx);

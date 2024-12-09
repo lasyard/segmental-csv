@@ -10,17 +10,31 @@ void list_head_init(struct list_head *head)
     head->first = head->last = NULL;
 }
 
+static void to_real_last(struct list_head *head)
+{
+    while (head->last->next != NULL) {
+        head->last = head->last->next;
+    }
+}
+
 void list_add(struct list_head *head, struct list_item *item)
 {
     if (head->first == NULL) {
         head->first = head->last = item;
     } else {
+        to_real_last(head);
         head->last->next = item;
         head->last = item;
     }
 }
 
-void list_head_add(struct list_head *head, struct list_item *item)
+void list_ins(struct list_item *pos, struct list_item *item)
+{
+    item->next = pos->next;
+    pos->next = item;
+}
+
+void list_ins_head(struct list_head *head, struct list_item *item)
 {
     item->next = head->first;
     head->first = item;
@@ -38,6 +52,7 @@ void list_del(struct list_head *head, struct list_item *item)
         }
         return;
     }
+    to_real_last(head);
     for (struct list_item *p = head->first; p->next != NULL; p = p->next) {
         if (p->next == item) {
             p->next = item->next;
@@ -46,15 +61,6 @@ void list_del(struct list_head *head, struct list_item *item)
             }
             break;
         }
-    }
-}
-
-void list_ins(struct list_head *head, struct list_item *pos, struct list_item *item)
-{
-    item->next = pos->next;
-    pos->next = item;
-    if (head->last == pos) {
-        head->last = item;
     }
 }
 
@@ -73,7 +79,8 @@ bool list_is_first(const struct list_head *head, const struct list_item *item)
     return head->first == item;
 }
 
-bool list_is_last(const struct list_head *head, const struct list_item *item)
+bool list_is_last(struct list_head *head, const struct list_item *item)
 {
+    to_real_last(head);
     return head->last == item;
 }

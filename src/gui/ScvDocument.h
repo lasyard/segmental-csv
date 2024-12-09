@@ -50,6 +50,9 @@ public:
     void SetItemValueString(struct item *item, int i, const wxString &value);
     void SetSegmentValueString(struct segment *segment, const wxString &value);
 
+    struct item *InsertItem(struct item *pos);
+    struct item *InsertItemHead(struct segment *segment);
+
 private:
     ScvView *GetView() const;
 

@@ -68,7 +68,7 @@ bool ScvTable::InsertRows(size_t pos, size_t numRows)
 {
     size_t i;
     for (i = 0; i < numRows; ++i) {
-        if (!InsertRow(pos)) {
+        if (!InsertRow(pos - 1)) {
             break;
         }
         m_cache->insert(std::next(m_cache->begin(), pos), wxArrayString());
@@ -225,9 +225,9 @@ bool ScvTable::InsertRow(size_t pos)
     auto &index = m_index[pos];
     struct item *item = nullptr;
     if (index.m_type == ITEM) {
-        // item = insert_item((struct item *)index.m_ptr);
+        item = m_doc->InsertItem(static_cast<struct item *>(index.m_ptr));
     } else if (index.m_type == SEGMENT) {
-        // item = add_item_head((struct segment *)index.m_ptr);
+        item = m_doc->InsertItemHead(static_cast<struct segment *>(index.m_ptr));
     }
     if (item != nullptr) {
         int seq = index.m_seq + 1;

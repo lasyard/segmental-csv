@@ -19,6 +19,9 @@ extern "C" {
 
 struct item *add_new_item(const struct segmental_parser_context *ctx, struct segment *segment);
 
+struct item *insert_new_item(const struct segmental_parser_context *ctx, struct item *pos);
+struct item *insert_new_item_head(const struct segmental_parser_context *ctx, struct segment *segment);
+
 struct segment *add_new_segment(const struct segmental_parser_context *ctx, struct segments *segments);
 
 int segmental_parse(

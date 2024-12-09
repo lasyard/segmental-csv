@@ -197,6 +197,16 @@ void ScvDocument::SetSegmentValueString(struct segment *segment, const wxString 
     parse_field(&ctx, value.c_str(), segment->data, 0);
 }
 
+struct item *ScvDocument::InsertItem(struct item *pos)
+{
+    return insert_new_item(&m_ctx, pos);
+}
+
+struct item *ScvDocument::InsertItemHead(struct segment *segment)
+{
+    return insert_new_item_head(&m_ctx, segment);
+}
+
 ScvView *ScvDocument::GetView() const
 {
     auto *view = this->GetFirstView();

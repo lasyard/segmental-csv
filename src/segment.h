@@ -20,7 +20,9 @@ extern "C" {
 void init_segment(struct segment *segment, void *data);
 
 void add_item(struct segment *segment, struct item *item);
-void add_item_head(struct segment *segment, struct item *item);
+
+void insert_item(struct item *pos, struct item *item);
+void insert_item_head(struct segment *segment, struct item *item);
 
 bool segment_is_empty(const struct segment *segment);
 

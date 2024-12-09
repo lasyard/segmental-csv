@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: crypto-file-viewer 1.0.0\n"
 "Report-Msgid-Bugs-To: lasyard@yeah.net\n"
-"POT-Creation-Date: 2024-12-04 15:36+0800\n"
+"POT-Creation-Date: 2024-12-09 17:26+0800\n"
 "PO-Revision-Date: 2024-11-11 16:46+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -23,6 +23,26 @@ msgstr " 文档"
 #: ScvApp.cpp:42
 msgid " View"
 msgstr " 视图"
+
+#: ScvDocument.cpp:76
+msgid "Create scv files is not allowed!"
+msgstr "不允许创建 SCV 文件！"
+
+#: ScvDocument.cpp:102
+msgid "The first line must be labels of columns."
+msgstr "第一行必须是列的名称。"
+
+#: ScvDocument.cpp:107
+msgid "Zero columns are defined."
+msgstr "没有定义列。"
+
+#: ScvDocument.cpp:114
+msgid "Error occured to parse labels."
+msgstr "列名解析错误"
+
+#: ScvDocument.cpp:119
+msgid "The second line must be types of columns."
+msgstr "第二行必须是列的类型。"
 
 #: ScvMainFrame.cpp:67
 msgid "File"

@@ -14,9 +14,14 @@ void add_item(struct segment *segment, struct item *item)
     list_add(&segment->items, &item->list);
 }
 
-void add_item_head(struct segment *segment, struct item *item)
+void insert_item(struct item *pos, struct item *item)
 {
-    list_head_add(&segment->items, &item->list);
+    list_ins(&pos->list, &item->list);
+}
+
+void insert_item_head(struct segment *segment, struct item *item)
+{
+    list_ins_head(&segment->items, &item->list);
 }
 
 bool segment_is_empty(const struct segment *segment)

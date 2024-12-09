@@ -14,7 +14,7 @@ void add_segment(struct segments *segments, struct segment *segment)
 
 void add_segment_head(struct segments *segments, struct segment *segment)
 {
-    list_head_add(&segments->segments, &segment->list);
+    list_ins_head(&segments->segments, &segment->list);
 }
 
 struct segment *get_last_segment(struct segments *segments)
