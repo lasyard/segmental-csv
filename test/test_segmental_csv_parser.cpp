@@ -66,6 +66,7 @@ static void test_write(void *context, const char *buf, size_t len)
 {
     std::ostringstream *oss = static_cast<std::ostringstream *>(context);
     oss->write(buf, len);
+    oss->write("\n", 1);
 }
 }
 

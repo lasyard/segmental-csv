@@ -144,12 +144,16 @@ void ScvGrid::CreateScvTable(ScvDocument *doc)
     // Vital, for the original grid cursor may be out of range.
     int cursorRow = GetGridCursorRow();
     int maxRow = table->GetNumberRows() - 1;
+    SetTable(table, true);
     if (maxRow >= 0 && cursorRow > maxRow) {
         SetGridCursor(maxRow, GetGridCursorCol());
     }
-    // Change table after cursor set.
-    SetTable(table, true);
     RefreshContent();
+}
+
+void ScvGrid::SaveScvTable()
+{
+    SaveEditControlValue();
 }
 
 void ScvGrid::CheckEventHandler()

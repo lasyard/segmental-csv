@@ -58,6 +58,10 @@ const char *get_cstr_field(const struct parser_context *ctx, const void *data, i
 
 char *output_line(const struct parser_context *ctx, char *buf, const void *data);
 
+char *output_strings(const struct parser_options *opt, char *buf, const char *const *data, int count);
+
+char *output_types(const struct parser_options *opt, char *buf, const enum column_type *types, int count);
+
 void *common_get_ptr(void *data, int i, const void *context);
 
 struct common_record_meta *use_common_record(struct parser_context *ctx);

@@ -147,8 +147,8 @@ TEST_CASE("outputLine")
         r.i1 = 10;
         r.i2 = -100;
         char *p = output_line(&ctx, buf, &r);
-        *p = '\0';
-        CHECK(strcmp(buf, "10,-100\n") == 0);
+        CHECK(*p == '\0');
+        CHECK(strcmp(buf, "10,-100") == 0);
     }
 
     SUBCASE("sep == '|'")
@@ -157,8 +157,8 @@ TEST_CASE("outputLine")
         r.i2 = -100;
         ctx.options.sep = '|';
         char *p = output_line(&ctx, buf, &r);
-        *p = '\0';
-        CHECK(strcmp(buf, "10|-100\n") == 0);
+        CHECK(*p == '\0');
+        CHECK(strcmp(buf, "10|-100") == 0);
     }
 }
 

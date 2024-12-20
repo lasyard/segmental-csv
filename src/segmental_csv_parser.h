@@ -24,17 +24,26 @@ struct item *insert_new_item_head(const struct segmental_parser_context *ctx, st
 
 struct segment *add_new_segment(const struct segmental_parser_context *ctx, struct segments *segments);
 
+/**
+ * @brief Parse segmental csv file
+ *
+ * @param ctx
+ * @param segments
+ * @param read_line
+ * @param context
+ * @return the number of lines read, negative number means error
+ */
 int segmental_parse(
     const struct segmental_parser_context *ctx,
     struct segments *segments,
-    size_t (*read)(void *context, char *buf, size_t len),
+    size_t (*read_line)(void *context, char *buf, size_t len),
     void *context
 );
 
 int segmental_output(
     const struct segmental_parser_context *ctx,
     struct segments *segments,
-    void (*write)(void *context, const char *buf, size_t len),
+    void (*write_line)(void *context, const char *buf, size_t len),
     void *context
 );
 

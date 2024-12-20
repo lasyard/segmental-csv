@@ -106,6 +106,11 @@ static void set_options_money_prec(struct parser_options *opt, int money_prec)
     }
 }
 
+static void *get_ptr(const struct parser_context *ctx, void *data, int i)
+{
+    return ctx->f_get_ptr(data, i, ctx->context);
+}
+
 void init_options(struct parser_options *opt)
 {
     opt->sep = ',';
@@ -146,13 +151,13 @@ void init_data(const struct parser_context *ctx, void *data)
 {
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
-        init_by_type(type, ctx->f_get_ptr(data, i, ctx->context));
+        init_by_type(type, get_ptr(ctx, data, i));
     }
 }
 
 const char *parse_field(const struct parser_context *ctx, const char *buf, void *data, int i)
 {
-    return parse_by_type(&ctx->options, buf, ctx->types[i], ctx->f_get_ptr(data, i, ctx->context));
+    return parse_by_type(&ctx->options, buf, ctx->types[i], get_ptr(ctx, data, i));
 }
 
 const char *parse_line(const struct parser_context *ctx, const char *line, void *data)
@@ -171,7 +176,7 @@ void release_data(const struct parser_context *ctx, void *data)
     for (int i = 0; i < ctx->cols; ++i) {
         enum column_type type = ctx->types[i];
         if (type == CT_CSTR) {
-            char **cstr = (char **)(ctx->f_get_ptr(data, i, ctx->context));
+            char **cstr = (char **)(get_ptr(ctx, data, i));
             free(*cstr);
         }
     }
@@ -219,17 +224,12 @@ const char *parse_types(const struct parser_options *opt, const char *line, enum
 
 char *output_field(const struct parser_context *ctx, char *buf, const void *data, int i)
 {
-    return output_by_type(
-        &ctx->options,
-        buf,
-        ctx->types[i],
-        (const void *)(ctx->f_get_ptr((void *)data, i, ctx->context))
-    );
+    return output_by_type(&ctx->options, buf, ctx->types[i], (const void *)(get_ptr(ctx, (void *)data, i)));
 }
 
 const char *get_cstr_field(const struct parser_context *ctx, const void *data, int i)
 {
-    const char *s = *(const char *const *)(ctx->f_get_ptr((void *)data, i, ctx->context));
+    const char *s = *(const char *const *)(get_ptr(ctx, (void *)data, i));
     return s != NULL ? s : "";
 }
 
@@ -242,7 +242,36 @@ char *output_line(const struct parser_context *ctx, char *buf, const void *data)
             *(p++) = ctx->options.sep;
         }
     }
-    *(p++) = '\n';
+    *p = '\0';
+    return p;
+}
+
+char *output_strings(const struct parser_options *opt, char *buf, const char *const *data, int count)
+{
+    char *p = buf;
+    for (int i = 0; i < count; ++i) {
+        const char *s = data[i];
+        if (s != NULL) {
+            p = output_cstring(p, s);
+        }
+        if (i < count - 1) {
+            *(p++) = opt->sep;
+        }
+    }
+    *p = '\0';
+    return p;
+}
+
+char *output_types(const struct parser_options *opt, char *buf, const enum column_type *types, int count)
+{
+    char *p = buf;
+    for (int i = 0; i < count; ++i) {
+        p = output_cstring(p, name_of(types[i]));
+        if (i < count - 1) {
+            *(p++) = opt->sep;
+        }
+    }
+    *p = '\0';
     return p;
 }
 

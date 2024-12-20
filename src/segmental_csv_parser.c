@@ -95,13 +95,13 @@ struct segment *add_new_segment(const struct segmental_parser_context *ctx, stru
 int segmental_parse(
     const struct segmental_parser_context *ctx,
     struct segments *segments,
-    size_t (*read)(void *context, char *buf, size_t len),
+    size_t (*read_line)(void *context, char *buf, size_t len),
     void *context
 )
 {
     char buf[MAX_LINE_LENGTH + 1];
     int line = 0;
-    while (read(context, buf, MAX_LINE_LENGTH)) {
+    while (read_line(context, buf, MAX_LINE_LENGTH)) {
         ++line;
         if (is_line_end(buf[0])) {
             continue;
@@ -127,6 +127,7 @@ int segmental_parse(
                 }
             }
         }
+        line = -line;
         break;
     }
     return line;
@@ -135,7 +136,7 @@ int segmental_parse(
 int segmental_output(
     const struct segmental_parser_context *ctx,
     struct segments *segments,
-    void (*write)(void *context, const char *buf, size_t len),
+    void (*write_line)(void *context, const char *buf, size_t len),
     void *context
 )
 {
@@ -147,12 +148,12 @@ int segmental_output(
         struct segment *segment = get_segment(p);
         buf[0] = '#';
         char *tail = output_line(&ctx->segment_parser_context, &buf[1], segment->data);
-        write(context, buf, tail - buf);
+        write_line(context, buf, tail - buf);
         for (q = segment->items.first; q != NULL; q = q->next) {
             ++line;
             struct item *item = get_item(q);
             char *tail = output_line(&ctx->item_parser_context, buf, item->data);
-            write(context, buf, tail - buf);
+            write_line(context, buf, tail - buf);
         }
     }
     return line;

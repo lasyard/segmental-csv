@@ -57,6 +57,7 @@ public:
     void OnGridSelectCell(wxGridEvent &event);
 
     void CreateScvTable(ScvDocument *doc);
+    void SaveScvTable();
 
 private:
     static const int ROW_HEIGHT = 25;

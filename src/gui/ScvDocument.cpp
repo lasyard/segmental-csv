@@ -41,6 +41,12 @@ size_t scv_read(void *context, char *buf, size_t len)
     strncpy(buf, line, len);
     return line.Length();
 }
+
+void scv_write(void *context, const char *buf, [[maybe_unused]] size_t len)
+{
+    wxTextFile *file = static_cast<wxTextFile *>(context);
+    file->AddLine(buf);
+}
 }
 
 ScvDocument::ScvDocument() : wxDocument(), m_count(0), m_labels(nullptr), m_types(nullptr), m_crm(NULL)
@@ -126,7 +132,12 @@ bool ScvDocument::DoOpenDocument(const wxString &fileName)
     m_crm = use_common_record(&m_ctx.item_parser_context);
     m_ctx.item_data_size = m_crm->bytes;
     lines = segmental_parse(&m_ctx, &m_segments, scv_read, &file);
-    wxLogStatus("%d lines read.", lines);
+    if (lines < 0) {
+        wxLogError(_("Parse error at line %d"), -lines + 2);
+        goto err;
+    }
+    wxLogStatus(_("%d lines read"), lines + 2);
+    file.Close();
     return true;
 err:
     file.Close();
@@ -140,6 +151,20 @@ bool ScvDocument::DoSaveDocument(const wxString &fileName)
     if (view != nullptr) {
         view->SaveContents();
     }
+    wxTextFile file(fileName);
+    if (!(wxFile::Exists(fileName) ? file.Open() : file.Create())) {
+        wxLogError(_("Cannot open file %s."), fileName);
+        return false;
+    }
+    file.Clear();
+    char buf[MAX_LINE_LENGTH];
+    output_strings(&m_ctx.item_parser_context.options, buf, m_labels, m_count);
+    file.AddLine(buf);
+    output_types(&m_ctx.item_parser_context.options, buf, m_types, m_count);
+    file.AddLine(buf);
+    segmental_output(&m_ctx, &m_segments, scv_write, &file);
+    file.Write();
+    file.Close();
     return true;
 }
 

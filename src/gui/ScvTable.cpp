@@ -80,6 +80,7 @@ bool ScvTable::InsertRows(size_t pos, size_t numRows)
             wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_INSERTED, pos, i);
             grid->ProcessTableMessage(msg);
         }
+        m_doc->Modify(true);
         return true;
     }
     return false;
@@ -101,6 +102,7 @@ bool ScvTable::AppendRows(size_t numRows)
             wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, i, 0);
             grid->ProcessTableMessage(msg);
         }
+        m_doc->Modify(true);
         return true;
     }
     return false;
@@ -121,6 +123,7 @@ bool ScvTable::DeleteRows(size_t pos, size_t numRows)
             wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, i);
             grid->ProcessTableMessage(msg);
         }
+        m_doc->Modify(true);
         return true;
     }
     return false;

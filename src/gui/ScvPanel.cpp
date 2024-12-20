@@ -49,6 +49,7 @@ void ScvPanel::OnUpdate()
 
 void ScvPanel::SaveContents()
 {
+    m_grid->SaveScvTable();
 }
 
 void ScvPanel::OnUpdateInsert(wxUpdateUIEvent &event)
