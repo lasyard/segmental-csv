@@ -4,6 +4,7 @@
 
 #include "ScvApp.h"
 
+#include "ScvArtProvider.h"
 #include "ScvDocument.h"
 #include "ScvMainFrame.h"
 #include "ScvView.h"
@@ -26,6 +27,7 @@ bool ScvApp::OnInit()
     wxFileSystem::AddHandler(new wxArchiveFSHandler());
     wxXmlResource::Get()->InitAllHandlers();
     wxString resDir = wxStandardPaths::Get().GetResourcesDir();
+    wxArtProvider::Push(new ScvArtProvider(resDir));
     wxXmlResource::Get()->LoadFile(wxFileName(resDir, XRS_FILE));
     wxImage::AddHandler(new wxPNGHandler());
     SetVendorName("Lasy");

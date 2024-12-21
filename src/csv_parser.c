@@ -279,7 +279,7 @@ void *common_get_ptr(void *data, int i, const void *context)
 {
     const struct common_record_meta *crm = (const struct common_record_meta *)context;
     size_t offset = crm->offsets[i];
-    return data + offset;
+    return (char *)data + offset;
 }
 
 struct common_record_meta *use_common_record(struct parser_context *ctx)

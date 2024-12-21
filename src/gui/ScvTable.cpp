@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <wx/log.h>
 
 #include "ScvTable.h"
